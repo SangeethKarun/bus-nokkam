@@ -1,25 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import { Route, Routes } from "react-router-dom";
+import NavBar from "./components/NavBar";
+import Bookings from "./pages/Bookings";
+import Buses from "./pages/Buses";
+import HomePage from "./pages/HomePage";
+import "./../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import PrivateBus from "./components/PrivateBus";
+import PublicBus from "./components/PublicBus";
+import NotFound from "./components/NotFound";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <NavBar />
+
+      <Routes>
+        <Route path="/" element={<HomePage />}></Route>
+        <Route path="/buses" element={<Buses />}>
+          <Route path="private" element={<PrivateBus />}></Route>
+          <Route path="public" element={<PublicBus />}></Route>
+        </Route>
+        <Route path="/bookings" element={<Bookings />}></Route>
+        <Route path="*" element={<NotFound />}></Route>
+      </Routes>
     </div>
   );
-}
+};
 
 export default App;
