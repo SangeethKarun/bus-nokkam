@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/bus-nokkam/static/css/main.8c25d846.css",
+    "main.js": "/bus-nokkam/static/js/main.ac705c27.js",
+    "static/js/453.a2f2f22e.chunk.js": "/bus-nokkam/static/js/453.a2f2f22e.chunk.js",
+    "index.html": "/bus-nokkam/index.html",
+    "main.8c25d846.css.map": "/bus-nokkam/static/css/main.8c25d846.css.map",
+    "main.ac705c27.js.map": "/bus-nokkam/static/js/main.ac705c27.js.map",
+    "453.a2f2f22e.chunk.js.map": "/bus-nokkam/static/js/453.a2f2f22e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8c25d846.css",
+    "static/js/main.ac705c27.js"
+  ]
+}
