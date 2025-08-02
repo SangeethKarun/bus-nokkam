@@ -1,7 +1,9 @@
-import { Button, Dropdown, Form } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
+import { Button, Form, Container, Row, Col, Spinner } from "react-bootstrap";
+import Select from "react-select";
 import { Outlet } from "react-router-dom";
 import BusOptions from "../components/BusOptions";
+import EmptySectionWallpaper from "../components/EmptyStatePlaceholder";
 
 const Buses = () => {
   const [busRoutes, setBusRoutes] = useState([]);
@@ -22,7 +24,9 @@ const Buses = () => {
       );
       const result = await response.json();
       setBusRoutes(result.data);
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error fetching bus routes:", err);
+    }
   };
 
   const fetchCities = async () => {
@@ -31,23 +35,30 @@ const Buses = () => {
         "https://assets.onlineksrtcswift.com/api/resource/getStaticCityList"
       );
       const result = await response.json();
-      const cities = Object.entries(result.data).map(([id, name]) => ({
-        id,
-        name,
+      const cityList = Object.entries(result.data).map(([id, name]) => ({
+        value: id,
+        label: name,
       }));
-      setCities(cities);
-    } catch (err) {}
+      setCities(cityList);
+    } catch (err) {
+      console.error("Error fetching cities:", err);
+    }
   };
 
   const handleSearchBus = async () => {
+    if (!selectedFrom || !selectedTo || !selectedDate) {
+      setSomeError("Please select all fields before searching.");
+      setAvailableBus([]);
+      return;
+    }
+
     try {
       setSearchLoading(true);
       setSomeError(null);
-      const apiLink = `https://onlineksrtcswift.com/api/resource/searchRoutesV4?fromCityID=${selectedFrom.id}&toCityID=${selectedTo.id}&journeyDate=${selectedDate}&mode=oneway`;
+      const apiLink = `https://onlineksrtcswift.com/api/resource/searchRoutesV4?fromCityID=${selectedFrom.value}&toCityID=${selectedTo.value}&journeyDate=${selectedDate}&mode=oneway`;
       const response = await fetch(apiLink);
       const result = await response.json();
       setAvailableBus(result);
-      console.log(result);
     } catch (err) {
       setSomeError(err.message);
       setAvailableBus([]);
@@ -56,20 +67,23 @@ const Buses = () => {
     }
   };
 
-  const handleSelectFrom = (eventKey) => {
-    const city = cities.find((c) => c.id.toString() === eventKey);
-    setSelectedFrom(city);
+  const handleSelectFrom = (option) => {
+    setSelectedFrom(option);
     setAvailableBus([]);
-    const availableDestinationsIdsSet = new Set(busRoutes[city.id].map(String));
-    const availableDestinations = cities.filter((city) =>
-      availableDestinationsIdsSet.has(city.id.toString())
+    if (!option) {
+      setAvailableDestinations([]);
+      return;
+    }
+    const destIds = new Set(busRoutes[option.value]?.map(String));
+    const filteredDests = cities.filter((city) =>
+      destIds.has(city.value.toString())
     );
-    setAvailableDestinations(availableDestinations);
+    setAvailableDestinations(filteredDests);
+    setSelectedTo(null);
   };
 
-  const handleSelectTo = (eventKey) => {
-    const city = cities.find((c) => c.id.toString() === eventKey);
-    setSelectedTo(city);
+  const handleSelectTo = (option) => {
+    setSelectedTo(option);
     setAvailableBus([]);
   };
 
@@ -80,79 +94,67 @@ const Buses = () => {
   useEffect(() => {
     fetchBusList();
     fetchCities();
-    setSomeError(null);
   }, []);
 
   return (
-    <div className="m-5">
-      <h4>Plan your travel</h4>
+    <Container className="my-5">
+      <h4 className="mb-4">Plan your travel</h4>
 
-      <div className="d-flex flex-wrap align-items-center justify-content-start gap-3 p-3 border rounded shadow-sm bg-light">
-        <div>
-          <label className="form-label mb-1">From</label>
-          <Dropdown onSelect={handleSelectFrom}>
-            <Dropdown.Toggle variant="outline-primary" id="dropdown-from">
-              {selectedFrom?.name ?? "Select City"}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {cities.map((item, index) => (
-                <Dropdown.Item key={index} eventKey={item.id.toString()}>
-                  {item.name}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
+      <div className="p-4 border rounded shadow-sm bg-light">
+        <Row className="g-3 align-items-end">
+          <Col md={4}>
+            <Form.Label>From</Form.Label>
+            <Select
+              options={cities}
+              placeholder="Select City"
+              value={selectedFrom}
+              onChange={handleSelectFrom}
+              isClearable
+            />
+          </Col>
 
-        <div>
-          <label className="form-label mb-1">To</label>
-          <Dropdown onSelect={handleSelectTo}>
-            <Dropdown.Toggle variant="outline-primary" id="dropdown-to">
-              {selectedTo?.name ?? "Select Destination"}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {availableDestinations.map((item, index) => (
-                <Dropdown.Item key={index} eventKey={item.id.toString()}>
-                  {item.name}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
+          <Col md={4}>
+            <Form.Label>To</Form.Label>
+            <Select
+              options={availableDestinations}
+              placeholder="Select Destination"
+              value={selectedTo}
+              onChange={handleSelectTo}
+              isClearable
+              isDisabled={!selectedFrom}
+            />
+          </Col>
 
-        <div>
-          <label className="form-label mb-1">Date</label>
-          <Form.Control type="date" onChange={handleSelectDate} />
-        </div>
+          <Col md={3}>
+            <Form.Label>Date</Form.Label>
+            <Form.Control type="date" onChange={handleSelectDate} />
+          </Col>
 
-        <div className="align-self-end">
-          <Button variant="primary" onClick={handleSearchBus}>
-            🔍 Search Bus
-          </Button>
-        </div>
+          <Col md={1} className="d-grid">
+            <Button variant="primary" onClick={handleSearchBus}>
+              🔍
+            </Button>
+          </Col>
+        </Row>
       </div>
-      {someError && (
-        <div
-          className="d-flex justify-content-center align-items-center"
-          style={{ height: 100 }}
-        >
-          <p className="text-danger">{someError}</p>
-        </div>
-      )}
 
-      {searchLoading ? (
-        <div
-          className="d-flex justify-content-center align-items-center"
-          style={{ height: 100 }}
-        >
-          <progress />
-        </div>
-      ) : (
-        <BusOptions options={availableBus} />
-      )}
+      <div className="mt-4">
+        {searchLoading ? (
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ height: 150 }}
+          >
+            <Spinner animation="border" variant="primary" />
+          </div>
+        ) : someError || availableBus.length === 0 ? (
+          <EmptySectionWallpaper />
+        ) : (
+          <BusOptions options={availableBus} />
+        )}
+      </div>
 
       <Outlet />
-    </div>
+    </Container>
   );
 };
 

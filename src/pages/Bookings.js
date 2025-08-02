@@ -1,8 +1,11 @@
 import React from 'react'
+import EmptyStatePlaceholder from '../components/EmptyStatePlaceholder'
 
 const Bookings = () => {
   return (
-    <div>Bookings</div>
+    <div>Bookings
+      <EmptyStatePlaceholder/>
+    </div>
   )
 }
 

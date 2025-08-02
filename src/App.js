@@ -7,6 +7,7 @@ import "./../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import PrivateBus from "./components/PrivateBus";
 import PublicBus from "./components/PublicBus";
 import NotFound from "./components/NotFound";
+import Footer from "./components/Footer";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/bookings" element={<Bookings />}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
+      <Footer/>
     </div>
   );
 };
