@@ -139,6 +139,7 @@ const Buses = () => {
       </div>
 
       <div className="mt-4">
+        {someError && <p className="text-danger">{someError}</p>}
         {searchLoading ? (
           <div
             className="d-flex justify-content-center align-items-center"
@@ -146,7 +147,7 @@ const Buses = () => {
           >
             <Spinner animation="border" variant="primary" />
           </div>
-        ) : someError || availableBus.length === 0 ? (
+        ) :  availableBus.length === 0 ? (
           <EmptySectionWallpaper />
         ) : (
           <BusOptions options={availableBus} />
